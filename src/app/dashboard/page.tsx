@@ -4,10 +4,10 @@ import { useState, useMemo, useCallback } from "react";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { useSelection } from "@/hooks/useSelection";
 import { SearchFilter } from "@/components/SearchFilter";
-import { BulkActions } from "@/components/BulkActions";
 import { SubscriptionTable } from "@/components/SubscriptionTable";
+import { SelectionBar } from "@/components/SelectionBar";
 import { UnsubscribeDialog } from "@/components/UnsubscribeDialog";
-import { RefreshCw, AlertCircle } from "lucide-react";
+import { RefreshCw, AlertCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
@@ -29,14 +29,10 @@ export default function DashboardPage() {
     } = useSubscriptions();
 
     const {
-        isSelected,
-        toggle,
-        selectAll,
-        deselectAll,
-        isAllSelected,
-        isSomeSelected,
-        selectedCount,
         selectedIds,
+        toggle,
+        deselectAll,
+        selectedCount,
     } = useSelection();
 
     // Filter subscriptions based on search query
@@ -50,13 +46,8 @@ export default function DashboardPage() {
         );
     }, [subscriptions, searchQuery]);
 
-    const filteredIds = useMemo(
-        () => filteredSubscriptions.map((sub) => sub.id),
-        [filteredSubscriptions]
-    );
-
     // Handle export
-    const handleExport = async () => {
+    const handleExport = useCallback(async () => {
         setIsExporting(true);
         try {
             const response = await fetch("/api/youtube/export");
@@ -76,19 +67,24 @@ export default function DashboardPage() {
         } finally {
             setIsExporting(false);
         }
-    };
+    }, []);
 
     // Handle single unsubscribe
-    const handleUnsubscribeSingle = (id: string) => {
+    const handleUnsubscribeSingle = useCallback((id: string) => {
         setPendingUnsubscribeIds([id]);
         setShowUnsubscribeDialog(true);
-    };
+    }, []);
 
     // Handle bulk unsubscribe
-    const handleBulkUnsubscribe = () => {
+    const handleBulkUnsubscribe = useCallback(() => {
         setPendingUnsubscribeIds(Array.from(selectedIds));
         setShowUnsubscribeDialog(true);
-    };
+    }, [selectedIds]);
+
+    // Cancel selection
+    const handleCancelSelection = useCallback(() => {
+        deselectAll();
+    }, [deselectAll]);
 
     // Confirm unsubscribe
     const confirmUnsubscribe = useCallback(async () => {
@@ -129,9 +125,19 @@ export default function DashboardPage() {
                     <Button
                         variant="outline"
                         size="icon"
+                        onClick={handleExport}
+                        disabled={isExporting || isLoading}
+                        className="cursor-pointer border-zinc-600 bg-transparent text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                        aria-label="Export subscriptions as CSV"
+                    >
+                        <Download className={`h-4 w-4 ${isExporting ? "animate-pulse" : ""}`} />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
                         onClick={refresh}
                         disabled={isLoading}
-                        className="border-zinc-600 bg-transparent text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                        className="cursor-pointer border-zinc-600 bg-transparent text-zinc-300 hover:bg-zinc-700 hover:text-white"
                         aria-label="Refresh subscriptions"
                     >
                         <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -148,38 +154,30 @@ export default function DashboardPage() {
                         variant="outline"
                         size="sm"
                         onClick={refresh}
-                        className="ml-auto border-red-500/50 text-red-400 hover:bg-red-500/10"
+                        className="ml-auto cursor-pointer border-red-500/50 text-red-400 hover:bg-red-500/10"
                     >
                         Retry
                     </Button>
                 </div>
             )}
 
-            {/* Bulk Actions */}
-            {!isLoading && filteredSubscriptions.length > 0 && (
-                <BulkActions
-                    selectedCount={selectedCount}
-                    totalCount={filteredSubscriptions.length}
-                    isAllSelected={isAllSelected(filteredIds)}
-                    isSomeSelected={isSomeSelected(filteredIds)}
-                    onSelectAll={() => selectAll(filteredIds)}
-                    onDeselectAll={deselectAll}
-                    onUnsubscribe={handleBulkUnsubscribe}
-                    onExport={handleExport}
-                    isExporting={isExporting}
-                />
-            )}
-
             {/* Subscription List */}
             <SubscriptionTable
                 subscriptions={filteredSubscriptions}
+                selectedIds={selectedIds}
                 isLoading={isLoading}
                 isLoadingMore={isLoadingMore}
                 hasMore={hasMore && !searchQuery}
-                isSelected={isSelected}
                 onToggleSelect={toggle}
                 onLoadMore={loadMore}
                 onUnsubscribeSingle={handleUnsubscribeSingle}
+            />
+
+            {/* Fixed Selection Bar at Bottom */}
+            <SelectionBar
+                selectedCount={selectedCount}
+                onUnsubscribe={handleBulkUnsubscribe}
+                onCancel={handleCancelSelection}
             />
 
             {/* Unsubscribe Dialog */}

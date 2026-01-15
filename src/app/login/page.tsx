@@ -33,7 +33,7 @@ export default function LoginPage() {
                     >
                         <Button
                             type="submit"
-                            className="w-full bg-white text-zinc-900 hover:bg-zinc-100 font-medium h-12 text-base"
+                            className="w-full cursor-pointer bg-white text-zinc-900 hover:bg-zinc-100 font-medium h-12 text-base"
                         >
                             <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
                                 <path

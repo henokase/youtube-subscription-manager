@@ -1,29 +1,111 @@
 "use client";
 
+import { memo, useEffect, useRef, useCallback } from "react";
 import { Subscription } from "@/lib/youtube";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, ExternalLink, Loader2, Users } from "lucide-react";
-import { useEffect, useRef, useCallback } from "react";
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
+    selectedIds: Set<string>;
     isLoading: boolean;
     isLoadingMore: boolean;
     hasMore: boolean;
-    isSelected: (id: string) => boolean;
     onToggleSelect: (id: string) => void;
     onLoadMore: () => void;
     onUnsubscribeSingle: (id: string) => void;
 }
 
+interface SubscriptionItemProps {
+    subscription: Subscription;
+    isSelected: boolean;
+    onToggleSelect: (id: string) => void;
+    onUnsubscribeSingle: (id: string) => void;
+}
+
+// Memoized subscription item to prevent re-renders
+const SubscriptionItem = memo(function SubscriptionItem({
+    subscription,
+    isSelected,
+    onToggleSelect,
+    onUnsubscribeSingle,
+}: SubscriptionItemProps) {
+    return (
+        <div
+            className={`group flex items-center gap-4 rounded-lg border p-4 transition-colors ${isSelected
+                    ? "border-red-500/50 bg-red-500/10"
+                    : "border-zinc-700/50 bg-zinc-800/30 hover:border-zinc-600 hover:bg-zinc-800/50"
+                }`}
+        >
+            <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => onToggleSelect(subscription.id)}
+                aria-label={`Select ${subscription.title}`}
+                className="cursor-pointer border-zinc-600 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
+            />
+
+            <a
+                href={`https://www.youtube.com/channel/${subscription.channelId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-zinc-700 transition-transform hover:scale-105"
+            >
+                <img
+                    src={subscription.thumbnailUrl}
+                    alt={subscription.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                />
+            </a>
+
+            <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                    <a
+                        href={`https://www.youtube.com/channel/${subscription.channelId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="truncate font-medium text-white hover:text-red-400 hover:underline"
+                    >
+                        {subscription.title}
+                    </a>
+                    <ExternalLink className="h-3 w-3 flex-shrink-0 text-zinc-500" />
+                </div>
+                <p className="mt-1 line-clamp-1 text-sm text-zinc-400">
+                    {subscription.description || "No description"}
+                </p>
+            </div>
+
+            {subscription.subscriberCount && (
+                <Badge
+                    variant="secondary"
+                    className="hidden flex-shrink-0 bg-zinc-700 text-zinc-300 sm:flex"
+                >
+                    <Users className="mr-1 h-3 w-3" />
+                    {subscription.subscriberCount}
+                </Badge>
+            )}
+
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onUnsubscribeSingle(subscription.id)}
+                className="flex-shrink-0 cursor-pointer text-zinc-400 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                aria-label={`Unsubscribe from ${subscription.title}`}
+            >
+                <Trash2 className="h-4 w-4" />
+            </Button>
+        </div>
+    );
+});
+
 export function SubscriptionTable({
     subscriptions,
+    selectedIds,
     isLoading,
     isLoadingMore,
     hasMore,
-    isSelected,
     onToggleSelect,
     onLoadMore,
     onUnsubscribeSingle,
@@ -84,72 +166,15 @@ export function SubscriptionTable({
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3 pb-24">
             {subscriptions.map((subscription) => (
-                <div
+                <SubscriptionItem
                     key={subscription.id}
-                    className={`group flex items-center gap-4 rounded-lg border p-4 transition-all ${isSelected(subscription.id)
-                            ? "border-red-500/50 bg-red-500/10"
-                            : "border-zinc-700/50 bg-zinc-800/30 hover:border-zinc-600 hover:bg-zinc-800/50"
-                        }`}
-                >
-                    <Checkbox
-                        checked={isSelected(subscription.id)}
-                        onCheckedChange={() => onToggleSelect(subscription.id)}
-                        aria-label={`Select ${subscription.title}`}
-                        className="border-zinc-600 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
-                    />
-
-                    <a
-                        href={`https://www.youtube.com/channel/${subscription.channelId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-zinc-700 transition-transform hover:scale-105"
-                    >
-                        <img
-                            src={subscription.thumbnailUrl}
-                            alt={subscription.title}
-                            className="h-full w-full object-cover"
-                        />
-                    </a>
-
-                    <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                            <a
-                                href={`https://www.youtube.com/channel/${subscription.channelId}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="truncate font-medium text-white hover:text-red-400 hover:underline"
-                            >
-                                {subscription.title}
-                            </a>
-                            <ExternalLink className="h-3 w-3 flex-shrink-0 text-zinc-500" />
-                        </div>
-                        <p className="mt-1 line-clamp-1 text-sm text-zinc-400">
-                            {subscription.description || "No description"}
-                        </p>
-                    </div>
-
-                    {subscription.subscriberCount && (
-                        <Badge
-                            variant="secondary"
-                            className="hidden flex-shrink-0 bg-zinc-700 text-zinc-300 sm:flex"
-                        >
-                            <Users className="mr-1 h-3 w-3" />
-                            {subscription.subscriberCount}
-                        </Badge>
-                    )}
-
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onUnsubscribeSingle(subscription.id)}
-                        className="flex-shrink-0 text-zinc-400 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
-                        aria-label={`Unsubscribe from ${subscription.title}`}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
+                    subscription={subscription}
+                    isSelected={selectedIds.has(subscription.id)}
+                    onToggleSelect={onToggleSelect}
+                    onUnsubscribeSingle={onUnsubscribeSingle}
+                />
             ))}
 
             {/* Infinite scroll trigger */}

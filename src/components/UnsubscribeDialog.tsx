@@ -94,7 +94,7 @@ export function UnsubscribeDialog({
                         variant="outline"
                         onClick={onClose}
                         disabled={isProcessing}
-                        className="border-zinc-600 bg-transparent text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                        className="cursor-pointer border-zinc-600 bg-transparent text-zinc-300 hover:bg-zinc-700 hover:text-white"
                     >
                         Cancel
                     </Button>
@@ -102,7 +102,7 @@ export function UnsubscribeDialog({
                         variant="destructive"
                         onClick={handleConfirm}
                         disabled={isProcessing}
-                        className="bg-red-600 hover:bg-red-700"
+                        className="cursor-pointer bg-red-600 hover:bg-red-700"
                     >
                         {isProcessing ? (
                             <>
