@@ -15,7 +15,7 @@ export default async function Home() {
             Take back control of your feed
           </div>
           <h1 className="bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-6xl">
-            Clean up your YouTube subscriptions in seconds
+            UnsubTube: YouTube Subscription Manager
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-zinc-400">
             Effortlessly manage your YouTube channels. Bulk unsubscribe, filter by name, and export your data — all from a clean, modern dashboard.
