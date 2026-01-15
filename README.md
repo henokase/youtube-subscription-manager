@@ -2,10 +2,22 @@
 
 A modern web application for managing your YouTube channel subscriptions. Built with Next.js 16, NextAuth.js v5, and the YouTube Data API v3.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.1.2-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![NextAuth](https://img.shields.io/badge/NextAuth-v5.0.0_beta.30-black?style=flat-square)](https://next-auth.js.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+<div align="center">
+  <p>
+    <a href="https://nextjs.org/">
+      <img src="https://img.shields.io/badge/Next.js-16.1.2-black?style=flat-square&logo=next.js" alt="Next.js" />
+    </a>
+    <a href="https://www.typescriptlang.org/">
+      <img src="https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript" alt="TypeScript" />
+    </a>
+    <a href="https://next-auth.js.org/">
+      <img src="https://img.shields.io/badge/NextAuth-v5.0.0_beta.30-black?style=flat-square" alt="NextAuth.js" />
+    </a>
+    <a href="https://tailwindcss.com/">
+      <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-38bdf8?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" />
+    </a>
+  </p>
+</div>
 
 ## Features
 
@@ -183,7 +195,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the **MIT License**. See the LICENSE file for details.
 
 ## Acknowledgments
 

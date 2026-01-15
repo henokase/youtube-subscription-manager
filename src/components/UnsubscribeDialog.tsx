@@ -56,8 +56,12 @@ export function UnsubscribeDialog({
                         {isProcessing ? (
                             <>
                                 Processing... Please don&apos;t close this window.
-                                <br />
-                                {progress.completed} of {progress.total} completed
+                                {progress.total > 1 && (
+                                    <>
+                                        <br />
+                                        {progress.completed} of {progress.total} completed
+                                    </>
+                                )}
                             </>
                         ) : (
                             <>
@@ -73,15 +77,23 @@ export function UnsubscribeDialog({
 
                 {isProcessing && (
                     <div className="mx-auto w-full max-w-xs">
-                        <div className="h-2 overflow-hidden rounded-full bg-zinc-700">
-                            <div
-                                className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-300"
-                                style={{ width: `${progressPercent}%` }}
-                            />
-                        </div>
-                        <p className="mt-2 text-center text-sm text-zinc-400">
-                            {progressPercent}% complete
-                        </p>
+                        {progress.total > 1 ? (
+                            <>
+                                <div className="h-2 overflow-hidden rounded-full bg-zinc-700">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-300"
+                                        style={{ width: `${progressPercent}%` }}
+                                    />
+                                </div>
+                                <p className="mt-2 text-center text-sm text-zinc-400">
+                                    {progressPercent}% complete
+                                </p>
+                            </>
+                        ) : (
+                            <div className="flex justify-center">
+                                <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+                            </div>
+                        )}
                     </div>
                 )}
 

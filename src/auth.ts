@@ -18,17 +18,57 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         async jwt({ token, account }) {
-            // Persist the OAuth access_token and refresh_token to the token
+            // Initial sign in
             if (account) {
-                token.accessToken = account.access_token;
-                token.refreshToken = account.refresh_token;
-                token.expiresAt = account.expires_at;
+                return {
+                    accessToken: account.access_token,
+                    refreshToken: account.refresh_token,
+                    expiresAt: account.expires_at,
+                };
             }
-            return token;
+
+            // Return previous token if the access token has not expired yet
+            // Give a 10 second buffer
+            if (Date.now() < (token.expiresAt as number) * 1000 - 10000) {
+                return token;
+            }
+
+            // Access token has expired, try to update it
+            try {
+                // https://accounts.google.com/.well-known/openid-configuration
+                // We need the `token_endpoint`.
+                const response = await fetch("https://oauth2.googleapis.com/token", {
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        client_id: process.env.AUTH_GOOGLE_ID!,
+                        client_secret: process.env.AUTH_GOOGLE_SECRET!,
+                        grant_type: "refresh_token",
+                        refresh_token: token.refreshToken as string,
+                    }),
+                    method: "POST",
+                });
+
+                const tokens = await response.json();
+
+                if (!response.ok) throw tokens;
+
+                return {
+                    ...token,
+                    accessToken: tokens.access_token,
+                    expiresAt: Math.floor(Date.now() / 1000 + tokens.expires_in),
+                    // Fall back to old refresh token as Google doesn't always return a new one
+                    refreshToken: tokens.refresh_token ?? token.refreshToken,
+                };
+            } catch (error) {
+                console.error("Error refreshing access token", error);
+                // The error property will be used client-side to handle the refresh token error
+                return { ...token, error: "RefreshAccessTokenError" };
+            }
         },
         async session({ session, token }) {
-            // Send access token to the client for API calls
             session.accessToken = token.accessToken as string;
+            // @ts-ignore
+            session.error = token.error;
             return session;
         },
     },

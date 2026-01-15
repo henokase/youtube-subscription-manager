@@ -7,7 +7,7 @@ import { SearchFilter } from "@/components/SearchFilter";
 import { SubscriptionTable } from "@/components/SubscriptionTable";
 import { SelectionBar } from "@/components/SelectionBar";
 import { UnsubscribeDialog } from "@/components/UnsubscribeDialog";
-import { RefreshCw, AlertCircle, Download } from "lucide-react";
+import { RefreshCw, AlertCircle, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
@@ -139,7 +139,7 @@ export default function DashboardPage() {
                         className="cursor-pointer border-zinc-600 bg-transparent text-zinc-300 hover:bg-zinc-700 hover:text-white"
                         aria-label="Export subscriptions as CSV"
                     >
-                        <Download className={`h-4 w-4 ${isExporting ? "animate-pulse" : ""}`} />
+                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                     </Button>
                     <Button
                         variant="outline"
