@@ -21,8 +21,9 @@ export async function GET() {
         } while (pageToken);
 
         const csv = generateSubscriptionsCsv(allSubscriptions);
+        const bom = "\uFEFF"; // UTF-8 BOM
 
-        return new NextResponse(csv, {
+        return new NextResponse(bom + csv, {
             headers: {
                 "Content-Type": "text/csv",
                 "Content-Disposition": `attachment; filename="youtube-subscriptions-${new Date().toISOString().split("T")[0]}.csv"`,
