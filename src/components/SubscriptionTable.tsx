@@ -1,11 +1,12 @@
 "use client";
 
-import { memo, useEffect, useRef, useCallback } from "react";
+import { memo, useEffect, useRef, useCallback, useState } from "react";
+import Image from "next/image";
 import { Subscription } from "@/lib/youtube";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, ExternalLink, Loader2, Users } from "lucide-react";
+import { Trash2, ExternalLink, Loader2, Users, User } from "lucide-react";
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
@@ -24,6 +25,35 @@ interface SubscriptionItemProps {
     onToggleSelect: (id: string) => void;
     onUnsubscribeSingle: (id: string) => void;
 }
+
+const ChannelImage = memo(function ChannelImage({
+    src,
+    alt,
+}: {
+    src: string;
+    alt: string;
+}) {
+    const [error, setError] = useState(false);
+
+    if (error || !src) {
+        return (
+            <div className="flex h-full w-full items-center justify-center bg-zinc-800 text-zinc-500">
+                <User className="h-6 w-6" />
+            </div>
+        );
+    }
+
+    return (
+        <Image
+            src={src}
+            alt={alt}
+            fill
+            className="object-cover"
+            sizes="48px"
+            onError={() => setError(true)}
+        />
+    );
+});
 
 // Memoized subscription item to prevent re-renders
 const SubscriptionItem = memo(function SubscriptionItem({
@@ -52,12 +82,7 @@ const SubscriptionItem = memo(function SubscriptionItem({
                 rel="noopener noreferrer"
                 className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-zinc-700 transition-transform hover:scale-105"
             >
-                <img
-                    src={subscription.thumbnailUrl}
-                    alt={subscription.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                />
+                <ChannelImage src={subscription.thumbnailUrl} alt={subscription.title} />
             </a>
 
             <div className="min-w-0 flex-1">
@@ -169,6 +194,8 @@ export function SubscriptionTable({
         <div className="space-y-3 pb-24">
             {subscriptions.map((subscription) => (
                 <SubscriptionItem
+                    // Ensure key is unique using combination if needed, but dedupe logic should fix it.
+                    // Fallback to index is not ideal for deletion but unique ID is best.
                     key={subscription.id}
                     subscription={subscription}
                     isSelected={selectedIds.has(subscription.id)}

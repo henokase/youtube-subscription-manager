@@ -75,7 +75,11 @@ export function useSubscriptions(
 
         try {
             const data = await fetchSubscriptions(nextPageToken);
-            setSubscriptions((prev) => [...prev, ...data.items]);
+            setSubscriptions((prev) => {
+                const existingIds = new Set(prev.map((s) => s.id));
+                const newItems = data.items.filter((item) => !existingIds.has(item.id));
+                return [...prev, ...newItems];
+            });
             setNextPageToken(data.nextPageToken);
         } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
