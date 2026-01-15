@@ -15,6 +15,7 @@ export default function DashboardPage() {
     const [isExporting, setIsExporting] = useState(false);
     const [showUnsubscribeDialog, setShowUnsubscribeDialog] = useState(false);
     const [pendingUnsubscribeIds, setPendingUnsubscribeIds] = useState<string[]>([]);
+    const [unsubscribeProgress, setUnsubscribeProgress] = useState({ completed: 0, total: 0 });
 
     const {
         subscriptions,
@@ -88,7 +89,11 @@ export default function DashboardPage() {
 
     // Confirm unsubscribe
     const confirmUnsubscribe = useCallback(async () => {
-        for (const id of pendingUnsubscribeIds) {
+        const total = pendingUnsubscribeIds.length;
+        setUnsubscribeProgress({ completed: 0, total });
+
+        for (let i = 0; i < total; i++) {
+            const id = pendingUnsubscribeIds[i];
             try {
                 const response = await fetch(`/api/youtube/subscriptions/${id}`, {
                     method: "DELETE",
@@ -97,8 +102,11 @@ export default function DashboardPage() {
             } catch (error) {
                 console.error(`Failed to unsubscribe from ${id}:`, error);
             }
+
+            setUnsubscribeProgress((prev) => ({ ...prev, completed: i + 1 }));
+
             // Rate limit: 1 request per second
-            if (pendingUnsubscribeIds.indexOf(id) < pendingUnsubscribeIds.length - 1) {
+            if (i < total - 1) {
                 await new Promise((resolve) => setTimeout(resolve, 1000));
             }
         }
@@ -106,6 +114,7 @@ export default function DashboardPage() {
         removeSubscriptions(pendingUnsubscribeIds);
         deselectAll();
         setPendingUnsubscribeIds([]);
+        setUnsubscribeProgress({ completed: 0, total: 0 });
     }, [pendingUnsubscribeIds, removeSubscriptions, deselectAll]);
 
     return (
@@ -189,6 +198,7 @@ export default function DashboardPage() {
                 }}
                 selectedCount={pendingUnsubscribeIds.length}
                 onConfirm={confirmUnsubscribe}
+                progress={unsubscribeProgress}
             />
         </div>
     );

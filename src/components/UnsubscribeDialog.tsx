@@ -17,6 +17,7 @@ interface UnsubscribeDialogProps {
     onClose: () => void;
     selectedCount: number;
     onConfirm: () => Promise<void>;
+    progress: { completed: number; total: number };
 }
 
 export function UnsubscribeDialog({
@@ -24,19 +25,16 @@ export function UnsubscribeDialog({
     onClose,
     selectedCount,
     onConfirm,
+    progress,
 }: UnsubscribeDialogProps) {
     const [isProcessing, setIsProcessing] = useState(false);
-    const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
     const handleConfirm = async () => {
         setIsProcessing(true);
-        setProgress({ completed: 0, total: selectedCount });
-
         try {
             await onConfirm();
         } finally {
             setIsProcessing(false);
-            setProgress({ completed: 0, total: 0 });
             onClose();
         }
     };
@@ -53,9 +51,7 @@ export function UnsubscribeDialog({
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
                         <AlertTriangle className="h-6 w-6 text-red-500" />
                     </div>
-                    <DialogTitle className="text-center text-xl">
-                        Confirm Unsubscribe
-                    </DialogTitle>
+                    <DialogTitle className="text-center text-xl">Confirm Unsubscribe</DialogTitle>
                     <DialogDescription className="text-center text-zinc-400">
                         {isProcessing ? (
                             <>

@@ -65,8 +65,8 @@ const SubscriptionItem = memo(function SubscriptionItem({
     return (
         <div
             className={`group flex items-center gap-4 rounded-lg border p-4 transition-colors ${isSelected
-                    ? "border-red-500/50 bg-red-500/10"
-                    : "border-zinc-700/50 bg-zinc-800/30 hover:border-zinc-600 hover:bg-zinc-800/50"
+                ? "border-red-500/50 bg-red-500/10"
+                : "border-zinc-700/50 bg-zinc-800/30 hover:border-zinc-600 hover:bg-zinc-800/50"
                 }`}
         >
             <Checkbox
@@ -116,7 +116,7 @@ const SubscriptionItem = memo(function SubscriptionItem({
                 variant="ghost"
                 size="sm"
                 onClick={() => onUnsubscribeSingle(subscription.id)}
-                className="flex-shrink-0 cursor-pointer text-zinc-400 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                className="flex-shrink-0 cursor-pointer text-zinc-400 opacity-100 transition-opacity hover:bg-red-500/10 hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
                 aria-label={`Unsubscribe from ${subscription.title}`}
             >
                 <Trash2 className="h-4 w-4" />
